@@ -79,7 +79,8 @@ sequenceDiagram
 git clone https://github.com/ajin558/clash-ai-watchdog.git
 cd clash-ai-watchdog
 
-# 2. 直接双击 run.bat，或在命令行运行：
+# 2. 方式 A（推荐）：双击 run_tray.bat 启动系统托盘静默模式（任务栏右下角小图标，无控制台窗口）
+# 方式 B：双击 run.bat 启动控制台看板模式
 python main.py
 ```
 
@@ -91,13 +92,36 @@ chmod +x run.sh
 ./run.sh
 ```
 
+#### 📦 本地全局安装（可选）：
+```bash
+pip install -e .[all]
+# 安装后可在任何目录直接运行全局命令：
+caw        # 启动控制台守护模式
+caw-tray   # 启动系统托盘静默模式
+```
+
+---
+
+## 🖥️ 两种运行模式
+
+| 模式 | 启动方式 | 特点 |
+| :--- | :--- | :--- |
+| **系统托盘模式 (Tray)** | 双击 `run_tray.bat` 或 `python main.py --tray` | **无黑窗口打扰**，常驻在任务栏右下角。<br/>🟢 绿灯：正常<br/>🟡 黄灯：自愈切线中<br/>🔴 红灯：故障<br/>支持右键菜单**一键强制换线**、**网络自检**、**暂停守护** |
+| **控制台模式 (CLI)** | 双击 `run.bat` 或 `python main.py` | 适合调试与实时查看日志，带彩色 ASCII 看板与毫秒级延迟输出 |
+
 ---
 
 ## 🛠️ 常用命令行参数
 
 ```bash
+# 以系统托盘模式运行（静默后台无窗口）
+python main.py --tray
+
 # 执行单次网络诊断与节点测速评估（不进入循环常驻）
 python main.py --test
+
+# 查看版本
+python main.py -v
 
 # 指定监控目标服务（默认 gemini，可选 claude, openai, google_204）
 python main.py --service claude

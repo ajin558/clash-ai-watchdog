@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clash-ai-watchdog"
+version = "1.1.0"
+authors = [
+  { name = "ajin558", email = "3430198978@qq.com" },
+]
+description = "专为 AI Agent (Cursor / Antigravity / Claude Code) 打造的 Clash 代理自愈与僵尸连接清理守护工具"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = []
+
+[project.optional-dependencies]
+tray = [
+    "pystray>=0.19.5",
+    "pillow>=9.0.0"
+]
+all = [
+    "pystray>=0.19.5",
+    "pillow>=9.0.0",
+    "rich>=13.0.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ajin558/clash-ai-watchdog"
+"Bug Tracker" = "https://github.com/ajin558/clash-ai-watchdog/issues"
+
+[project.scripts]
+caw = "clash_watchdog.cli:main"
+caw-tray = "clash_watchdog.tray:main"

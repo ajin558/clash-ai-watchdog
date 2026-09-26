@@ -7,6 +7,9 @@ __pycache__/
 env/
 venv/
 ENV/
+build/
+dist/
+*.egg-info/
 
 # Local custom config (keep example in repo)
 config.json
