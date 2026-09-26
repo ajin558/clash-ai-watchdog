@@ -3,6 +3,7 @@
 > **专为 AI Agent / LLM 开发者打造的智能代理健康守护与自动换线自愈引擎**  
 > *Zero Token Consumption · Zero External Dependencies · Instant Zombie Connection Teardown*
 
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](pyproject.toml)
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20required-green.svg)](requirements.txt)
@@ -102,12 +103,12 @@ caw-tray   # 启动系统托盘静默模式
 
 ---
 
-## 🖥️ 两种运行模式
+## 🖥️ 两种运行模式与控制
 
-| 模式 | 启动方式 | 特点 |
-| :--- | :--- | :--- |
-| **系统托盘模式 (Tray)** | 双击 `run_tray.bat` 或 `python main.py --tray` | **无黑窗口打扰**，常驻在任务栏右下角。<br/>🟢 绿灯：正常<br/>🟡 黄灯：自愈切线中<br/>🔴 红灯：故障<br/>支持右键菜单**一键强制换线**、**网络自检**、**暂停守护** |
-| **控制台模式 (CLI)** | 双击 `run.bat` 或 `python main.py` | 适合调试与实时查看日志，带彩色 ASCII 看板与毫秒级延迟输出 |
+| 模式 | 启动方式 | 退出方式 | 特点 |
+| :--- | :--- | :--- | :--- |
+| **系统托盘模式 (Tray)** | 双击 `run_tray.bat` 或 `python main.py --tray` | 托盘图标右键退出，或双击 `stop.bat` / `停止守护.bat` | **无黑窗口打扰**，常驻在任务栏右下角。<br/>🟢 绿灯：正常<br/>🟡 黄灯：自愈切线中<br/>🔴 红灯：故障<br/>支持右键菜单**一键强制换线**、**网络自检**、**暂停守护** |
+| **控制台模式 (CLI)** | 双击 `run.bat` 或 `python main.py` | `Ctrl + C` | 适合调试与实时查看日志，带彩色 ASCII 看板与毫秒级延迟输出 |
 
 ---
 
@@ -153,9 +154,10 @@ python main.py --gen-config
     "check_timeout": 8,                  // 探测超时阈值（秒）
     "max_fail_count": 2,                 // 连续失败几次后触发切线自愈
 
-    "preferred_regions": ["US"],         // 优先切换的地区：US(美国), SG(新加坡), JP(日本)等
-    "blacklisted_keywords": [            // 垃圾节点过滤词
-        "官网", "到期", "剩余", "流量", "重置", "expire", "notice"
+    "preferred_regions": ["TW", "JP", "SG", "KR", "US", "DE", "UK"], // 优先切换地区（涵盖 Gemini/Antigravity 官方支持区）
+    "blacklisted_keywords": [            // 垃圾节点与未支持地区过滤词（默认硬封禁 HK/香港、CN、MO、RU，杜绝 400 地区封锁）
+        "官网", "到期", "剩余", "流量", "重置", "expire", "notice",
+        "HK", "Hong Kong", "HongKong", "香港", "CN", "China", "中国", "RU", "Russia", "俄罗斯"
     ],
     "target_groups": [                   // 托管切换的策略组
         "GLOBAL", "节点选择", "PROXY", "Auto"
@@ -185,6 +187,7 @@ When running long-duration or overnight tasks, network jitter or proxy IP change
 - ⚡ **Instant Zombie Socket Reset**: Drops stale TCP pools, forcing AI agent sockets to reconnect immediately without restarting your editor.
 - 🔍 **Auto Port Discovery**: Automatically detects active Clash / Mihomo ports (9097, 9090, 7890, etc.).
 - 🌐 **Multi-AI Presets**: Native health check targets for Gemini, Claude, and OpenAI.
+- 🛡️ **Smart Geo-Fencing & Wide Region Pool**: Out-of-the-box support for 200+ Gemini-supported regions (TW, JP, SG, KR, US, DE, UK). Automatically hard-blacklists unsupported regions (HK, CN, RU) to avoid catastrophic `User location is not supported` HTTP 400 errors.
 
 ---
 

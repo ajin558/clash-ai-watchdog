@@ -45,7 +45,7 @@ class WatchdogEngine:
 
         self.selector = NodeSelector(
             clash_client=self.clash,
-            preferred_regions=self.cfg.get("preferred_regions", ["US"]),
+            preferred_regions=self.cfg.get("preferred_regions", ["TW", "JP", "SG", "KR", "US", "DE", "UK"]),
             blacklisted_keywords=self.cfg.get("blacklisted_keywords", [])
         )
         return True
@@ -79,7 +79,7 @@ class WatchdogEngine:
 
     def heal(self):
         """执行换线自愈流程"""
-        log("触发自愈流程，开始多线程优选最佳节点...", "WARN")
+        log("触发自愈流程，开始多线程优选全球合规节点...", "WARN")
         self.notifier.beep(800, 200)
 
         proxies = self.clash.get_proxies()
@@ -93,10 +93,10 @@ class WatchdogEngine:
         )
 
         if not best_node:
-            log("未能找到任何可用的优选节点！", "ERROR")
+            log("未能找到任何可用的合规优选节点！", "ERROR")
             return False
 
-        log(f"优选目标锁定: [{region}] {best_node} (延迟: {best_delay}ms)", "INFO")
+        log(f"优选目标锁定: [{region}] {best_node} (真实API延迟: {best_delay}ms)", "INFO")
 
         target_groups = self.cfg.get("target_groups", ["GLOBAL", "节点选择"])
         switched = 0
@@ -124,7 +124,8 @@ class WatchdogEngine:
         interval = self.cfg.get("check_interval", 30)
         max_fails = self.cfg.get("max_fail_count", 2)
         service = self.cfg.get("target_service", "gemini")
-        regions = self.cfg.get("preferred_regions", ["US"])
+        regions = self.cfg.get("preferred_regions", ["TW", "JP", "SG", "KR", "US", "DE", "UK"])
+        cooldown = self.cfg.get("cooldown_seconds", 15)
 
         print_banner(service, interval, self.clash.mixed_proxy, self.clash.api_base, regions)
 
@@ -143,7 +144,8 @@ class WatchdogEngine:
                     if consecutive_fails >= max_fails:
                         if self.heal():
                             consecutive_fails = 0
-                            time.sleep(5)
+                            # 切换后进入防震荡观察期
+                            time.sleep(cooldown)
 
                 time.sleep(interval)
 

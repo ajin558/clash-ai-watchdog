@@ -7,8 +7,15 @@
     "check_interval": 30,
     "check_timeout": 8,
     "max_fail_count": 2,
+    "cooldown_seconds": 15,
     "preferred_regions": [
-        "US"
+        "TW",
+        "JP",
+        "SG",
+        "KR",
+        "US",
+        "DE",
+        "UK"
     ],
     "blacklisted_keywords": [
         "官网",
@@ -22,7 +29,24 @@
         "traffic",
         "reset",
         "info",
-        "notice"
+        "notice",
+        "香港",
+        "hk",
+        "hongkong",
+        "🇭🇰",
+        "中国",
+        "china",
+        "回国",
+        "国内",
+        "🇨🇳",
+        "澳门",
+        "macau",
+        "mo",
+        "🇲🇴",
+        "俄罗斯",
+        "russia",
+        "ru",
+        "🇷🇺"
     ],
     "target_groups": [
         "GLOBAL",

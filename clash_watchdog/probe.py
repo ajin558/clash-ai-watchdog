@@ -2,6 +2,7 @@
 """
 AI API 连通性探测器 (Probe)
 专注探测 Gemini / Claude / OpenAI 及自定义服务的实际链路通畅度与响应耗时
+具备智能识别 Google 区域封锁 (Location Not Supported) 防护能力
 """
 
 import time
@@ -37,15 +38,25 @@ class Probe:
         try:
             req = urllib.request.Request(
                 self.target_url,
-                headers={'User-Agent': 'ClashAIWatchdog/1.0.0 (HealthCheck)'}
+                headers={'User-Agent': 'ClashAIWatchdog/1.2.0 (HealthCheck)'}
             )
             with opener.open(req, timeout=self.timeout) as resp:
                 elapsed = int((time.time() - start_time) * 1000)
                 return True, elapsed
         except urllib.error.HTTPError as e:
-            # 即使返回 401/403/404 等，也证明与远端服务器的 TLS 握手及 HTTP 交互完全成功
+            err_body = ""
+            try:
+                err_body = e.read().decode('utf-8', errors='ignore')
+            except Exception:
+                pass
+
+            # 核心防护：精准识别 Google / AI 服务商的地域封锁拦截
+            lower_body = err_body.lower()
+            if "location is not supported" in lower_body or "not supported in your country" in lower_body:
+                return False, "地域受限: Google API 返回 User location is not supported"
+
+            # 其余 HTTP 状态（如无鉴权的 401/404）说明底层 TCP/TLS 链路及反代完全正常
             elapsed = int((time.time() - start_time) * 1000)
             return True, elapsed
         except Exception as e:
-            # 超时、连接被拒、代理端返回 502/504 等均判定为异常
             return False, str(e)
