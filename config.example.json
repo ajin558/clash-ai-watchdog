@@ -1,0 +1,40 @@
+{
+    "clash_api_base": "auto",
+    "clash_secret": "",
+    "mixed_proxy": "auto",
+    "target_service": "gemini",
+    "custom_target_url": "",
+    "check_interval": 30,
+    "check_timeout": 8,
+    "max_fail_count": 2,
+    "preferred_regions": [
+        "US"
+    ],
+    "blacklisted_keywords": [
+        "官网",
+        "到期",
+        "剩余",
+        "流量",
+        "重置",
+        "通知",
+        "发布",
+        "expire",
+        "traffic",
+        "reset",
+        "info",
+        "notice"
+    ],
+    "target_groups": [
+        "GLOBAL",
+        "节点选择",
+        "PROXY",
+        "Auto",
+        "代理"
+    ],
+    "notifications": {
+        "sound": true,
+        "desktop_toast": true,
+        "webhook_type": "",
+        "webhook_url": ""
+    }
+}

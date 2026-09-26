@@ -1,0 +1,10 @@
+# Clash-AI-Watchdog 依赖说明
+#
+# 【核心引擎 0 依赖】：
+# 本项目核心功能基于 Python 3.7+ 标准库（urllib, json, concurrent.futures 等）完全自闭环开发，
+# 无需通过 pip 安装任何必须依赖，开箱即用！
+#
+# 【可选美化与扩展依赖】：
+# 若需要高级终端 TUI 表格与原生跨平台弹窗，可选择性安装：
+# rich>=13.0.0
+# requests>=2.28.0
