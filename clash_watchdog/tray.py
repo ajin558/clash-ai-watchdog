@@ -12,7 +12,7 @@ import webbrowser
 
 try:
     import pystray
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
     HAS_TRAY_DEPS = True
 except ImportError:
     HAS_TRAY_DEPS = False
@@ -20,20 +20,20 @@ except ImportError:
 from .core import WatchdogEngine
 from .tui import log
 
-def create_badge_image(color_hex="#10B981", status_char="W"):
+def create_badge_image(color_hex="#10B981"):
     """使用 Pillow 在内存中动态绘制高清晰度状态托盘图标 (64x64)"""
     size = 64
     image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
 
-    # 绘制外圈高光圆角矩形/圆形底座
+    # 绘制外圈高光底座
     draw.ellipse((4, 4, size - 4, size - 4), fill=color_hex)
     
-    # 绘制内部微质感阴影内圆
+    # 绘制内部质感内圆
     inner_margin = 12
     draw.ellipse((inner_margin, inner_margin, size - inner_margin, size - inner_margin), fill="#FFFFFF")
 
-    # 在中心绘制简明标识
+    # 在中心绘制核心圆点
     draw.ellipse((inner_margin + 6, inner_margin + 6, size - inner_margin - 6, size - inner_margin - 6), fill=color_hex)
     return image
 
@@ -52,24 +52,26 @@ class TrayApp:
         self.last_status = "初始化中..."
         self.last_latency = "--"
         self.current_node = "未获取"
-        self.current_state = "init" # init, healthy, warning, error, paused
+        self.current_state = "init"
 
         # 图标颜色映射
         self.color_map = {
-            "healthy": "#10B981",  # 绿色
-            "warning": "#F59E0B",  # 橙黄色 (自愈中)
+            "healthy": "#10B981",  # 绿色 (正常)
+            "warning": "#F59E0B",  # 橙黄色 (自愈换线中)
             "error":   "#EF4444",  # 红色 (故障)
             "paused":  "#6B7280",  # 灰色 (暂停)
-            "init":    "#3B82F6"   # 蓝色
+            "init":    "#3B82F6"   # 蓝色 (初始化)
         }
 
     def _update_state(self, state, status_text):
         self.current_state = state
         self.last_status = status_text
         if self.icon:
-            self.icon.icon = create_badge_image(self.color_map.get(state, "#10B981"))
-            self.icon.title = f"Clash-AI-Watchdog: {status_text}"
-            self.icon.update_menu()
+            try:
+                self.icon.icon = create_badge_image(self.color_map.get(state, "#10B981"))
+                self.icon.title = f"Clash-AI-Watchdog: {status_text}"
+            except Exception:
+                pass
 
     def _watchdog_loop(self):
         """后台轮询工作线程"""
@@ -108,7 +110,7 @@ class TrayApp:
                 else:
                     consecutive_fails += 1
                     self.last_latency = "超时"
-                    self._update_state("warning", f"探测异常 [{consecutive_fails}/{max_fails}]")
+                    self._update_state("warning", f"异常 [{consecutive_fails}/{max_fails}]")
 
                     if consecutive_fails >= max_fails:
                         self._update_state("warning", "正在自动优选换线...")
@@ -120,7 +122,7 @@ class TrayApp:
                                 if g in proxies and "now" in proxies[g]:
                                     self.current_node = proxies[g]["now"]
                                     break
-                            self._update_state("healthy", f"自愈完成 ({self.current_node})")
+                            self._update_state("healthy", f"自愈完成 ({self.current_node[:15]})")
                             time.sleep(5)
                         else:
                             self._update_state("error", "换线失败，无可用节点")
@@ -144,7 +146,7 @@ class TrayApp:
                     if g in proxies and "now" in proxies[g]:
                         self.current_node = proxies[g]["now"]
                         break
-                self._update_state("healthy", f"已切换至: {self.current_node}")
+                self._update_state("healthy", f"已切换至: {self.current_node[:15]}")
             else:
                 self._update_state("error", "换线未成功")
         threading.Thread(target=_task, daemon=True).start()
@@ -155,12 +157,12 @@ class TrayApp:
             alive, result = self.engine.probe.check()
             if alive:
                 self.engine.notifier.show_toast(
-                    "网络诊断成功", 
+                    "Clash-AI-Watchdog 自检成功", 
                     f"目标服务通道畅通，延迟: {result}ms\n当前节点: {self.current_node}"
                 )
                 self._update_state("healthy", f"正常 ({result}ms)")
             else:
-                self.engine.notifier.show_toast("网络诊断失败", f"链路不可达: {result}")
+                self.engine.notifier.show_toast("Clash-AI-Watchdog 自检失败", f"链路不可达: {result}")
                 self._update_state("error", f"测试失败: {result}")
         threading.Thread(target=_task, daemon=True).start()
 
@@ -191,12 +193,12 @@ class TrayApp:
         if self.icon:
             self.icon.stop()
 
-    def build_menu(self):
-        """构建动态右键上下文菜单"""
+    def get_menu_items(self):
+        """生成动态右键菜单项"""
         pause_label = "▶️ 恢复守护" if self.paused else "⏸️ 暂停守护"
-        return pystray.Menu(
+        return (
             pystray.MenuItem(f"状态: {self.last_status}", lambda: None, enabled=False),
-            pystray.MenuItem(f"当前节点: {self.current_node[:25]}", lambda: None, enabled=False),
+            pystray.MenuItem(f"当前节点: {self.current_node[:20]}", lambda: None, enabled=False),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("⚡ 立即强制自愈换线", lambda: self.action_force_heal()),
             pystray.MenuItem("🔍 执行一次网络自检", lambda: self.action_diagnostics()),
@@ -220,7 +222,7 @@ class TrayApp:
             name="Clash-AI-Watchdog",
             icon=initial_image,
             title="Clash-AI-Watchdog: 启动中...",
-            menu=self.build_menu
+            menu=pystray.Menu(self.get_menu_items)
         )
         self.icon.run()
 
