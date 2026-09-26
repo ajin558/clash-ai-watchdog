@@ -76,7 +76,7 @@ sequenceDiagram
 #### Windows 用户：
 ```bash
 # 1. 克隆或下载本项目
-git clone https://github.com/your-username/clash-ai-watchdog.git
+git clone https://github.com/ajin558/clash-ai-watchdog.git
 cd clash-ai-watchdog
 
 # 2. 直接双击 run.bat，或在命令行运行：
@@ -85,7 +85,7 @@ python main.py
 
 #### macOS / Linux 用户：
 ```bash
-git clone https://github.com/your-username/clash-ai-watchdog.git
+git clone https://github.com/ajin558/clash-ai-watchdog.git
 cd clash-ai-watchdog
 chmod +x run.sh
 ./run.sh
