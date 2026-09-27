@@ -3,7 +3,7 @@
 > **专为 AI Agent / LLM 开发者打造的智能代理健康守护与自动换线自愈引擎**  
 > *Zero Token Consumption · Zero External Dependencies · Instant Zombie Connection Teardown*
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](pyproject.toml)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](pyproject.toml)
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20required-green.svg)](requirements.txt)
@@ -21,47 +21,54 @@
 - 💤 **任务无声假死**：控制台一直卡在“正在思考”或“正在等待响应”，一卡就是 10~20 分钟；
 - 🔄 **Clash 节点漂移**：代理客户端的 `url-test`（自动选路）在网络轻微抖动时频繁切节点，导致原有的长连接断开；
 - 💀 **TCP 僵尸半开连接（Half-Open Socket）**：客户端底层的 HTTP/2 或 gRPC 连接池并不知道网络已断，依然在傻等回复。即使你手动在 Clash 里换了节点，旧连接依然处于挂死状态！
+- 🚫 **Google 锁区 400 灾难**：盲目选了延迟最低的香港或大陆节点，导致 API 报错 `User location is not supported` 任务崩溃！
 
-**Clash-AI-Watchdog** 就是为了彻底终结这个痛点而生。
+**Clash-AI-Watchdog** 就是为了彻底终结这些痛点而生。
 
 ---
 
-## ⚡ 核心自愈机制与工作原理
+## ✨ v2.0.0 旗舰版核心特性
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Agent as AI Agent (Antigravity/Cursor)
-    participant Watchdog as Clash-AI-Watchdog
-    participant Clash as Clash / Mihomo Core
-    participant API as AI Endpoint (Gemini/OpenAI/Claude)
+- ⚡ **瀑布流真机 TLS 验真 (Waterfall True-Verification)**：自愈切线后 1 秒内通过代理端口向 AI 目标发送真实握手，彻底终结“假绿节点”与 GFW SNI 阻断导致的切线假死循环！
+- 🌿 **Zen 极简润物无声模式**：默认双行常驻紧凑状态灯，零多余刷屏，按 `(V)` 键一键在极简守护与全量仪表盘之间自由切换；
+- 🚀 **专线/家宽/IEPL 优先加权 & 直连硬拉黑**：源头屏蔽抗封锁能力为 0 的直连节点，专线与家宽优先保驾护航；
+- 🖥️ **沉浸式交互 TUI 看板**：原生 ANSI 零闪烁覆盖渲染，集成延迟微波形走势（Sparkline ` ▂▃▅`），极客感十足；
+- ⌨️ **单键毫秒级即时操控**：无需按回车，在终端直接按 `(V)` 切换极简/面板、`(R)` 立即换线、`(T)` 链路自检、`(P)` 暂停/继续、`(Q)` 安全退出；
+- 🔒 **内核级单实例互斥锁 (Zero-leak Mutex)**：基于 Win32 `CreateMutexW`，由操作系统监管，误多开自动秒退防冲突，绝无死锁残留文件；
+- 🛡️ **故障节点隔离冷却池 (Quarantine Pool)**：故障节点自动进入 10 分钟隔离池，配合迟滞评分，根除在不稳定节点间秒级来回震荡；
+- 🌐 **三路 AI 端点并发探活**：原生支持 Gemini、Claude、OpenAI 三大核心通道并发健康监测；
+- 🔌 **架构解耦 (Proxy Controller Abstraction)**：抽离 `BaseProxyController`，为未来扩展 Sing-box、v2rayN 奠定架构基石。
 
-    loop 每 30 秒心跳探测
-        Watchdog->>API: 轻量链路健康检测 (HTTP Handshake)
-        API-->>Watchdog: 响应正常 (毫秒级记录)
-    end
+---
 
-    Note over API: 网络抖动 / 节点 IP 被限流
-    Watchdog->>API: 连续 2 次探测超时！
-    
-    rect rgb(255, 235, 235)
-        Note over Watchdog,Clash: 触发自愈流程 (Heal)
-        Watchdog->>Clash: GET /proxies 获取节点列表
-        Watchdog->>Clash: 多线程并发测速筛选 [US / SG / JP] 优质节点
-        Watchdog->>Clash: PUT /proxies/{group} 切换到最低延迟新节点
-        Watchdog->>Clash: 核心关键：DELETE /connections (强行断开所有僵死 TCP 连接)
-    end
+## 🖥️ 终端交互式动态仪表盘 (Interactive TUI)
 
-    Clash-->>Agent: 发送 TCP RST / 连接断开信号
-    Agent->>Agent: 立即感知断开，抛弃旧连接池
-    Agent->>Clash: 瞬间发起全新请求（直通新美国 IP）
-    Clash-->>Agent: 任务无缝恢复运转！
+双击 `run.bat` 或在终端运行 `python main.py`，即刻进入交互式仪表盘：
+
+```text
+╔══════════════════════════════════════════════════════════════════════════════════════╗
+║  🐕 CLASH-AI-WATCHDOG v2.0            [🟢 监控中]  [可用率: 100.0%]                  ║
+║  模式: GEMINI 靶向守护     周期: 30s    代理: http://127.0.0.1:7897                  ║
+╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+  【实时代理通路】
+  当前活动节点 : 🇹🇼|台湾家宽-IEPL 02        实时延迟: 191ms [极佳]
+  延迟微波走势 :  ▂ ▃  ▂ ▂  ▂  ▂ ▂  ▂ ▃ ▂ ▂  (近15次心跳均值: 185ms)
+  三路端点状态 : [Gemini: 191ms 🟢]  [Claude: 215ms 🟢]  [OpenAI: 238ms 🟢]
+
+  【自愈与安全池】
+  自愈核心防御 : 斩断僵尸连接 (DELETE /connections) · 严防香港/大陆 400 锁区
+  今日自愈累计 : 2 次 (22:15 切至 [TW] 台湾家宽 (耗时: 191ms))
+  故障隔离冷却 : 无故障隔离节点 (全线健康)
+
+────────────────────────────────────────────────────────────────────────────────────────
+  【最近事件记录】
+  [23:05:12] [INFO] 心跳探测通过 | Gemini 191ms | Claude 215ms
+  [23:05:42] [INFO] 心跳探测通过 | Gemini 188ms | Claude 210ms
+────────────────────────────────────────────────────────────────────────────────────────
+  [快捷键] (R) 立即换线  │  (T) 链路自检  │  (P) 暂停/继续  │  (Q) 安全退出
+────────────────────────────────────────────────────────────────────────────────────────
 ```
-
-### 为什么这比 Clash 自带的 `url-test` 强得多？
-1. **定向探测 AI 服务**：Clash 自带测速只测百度或 Google 204，而本工具专门探测 `generativelanguage.googleapis.com`、`api.openai.com` 或 `api.anthropic.com`。
-2. **强行斩断僵尸连接（杀招）**：单纯切节点**无法唤醒已挂死的 TCP 连接**。Watchdog 会在换线后调用 `DELETE /connections`，逼迫客户端立刻报错并毫秒级重试，从而彻底实现**无人值守自愈**。
-3. **0 Token 消耗，0 成本**：仅做网络层握手探测，**绝不调用任何 LLM 生成接口，不消耗哪怕 1 个 Token**。
 
 ---
 
@@ -76,13 +83,12 @@ sequenceDiagram
 
 #### Windows 用户：
 ```bash
-# 1. 克隆或下载本项目
+# 1. 克隆本项目
 git clone https://github.com/ajin558/clash-ai-watchdog.git
 cd clash-ai-watchdog
 
-# 2. 方式 A（推荐）：双击 run_tray.bat 启动系统托盘静默模式（任务栏右下角小图标，无控制台窗口）
-# 方式 B：双击 run.bat 启动控制台看板模式
-python main.py
+# 2. 方式 A（交互控制看板）：双击 run.bat 或运行 python main.py
+# 方式 B（静默托盘模式）：双击 run_tray.bat
 ```
 
 #### macOS / Linux 用户：
@@ -93,28 +99,23 @@ chmod +x run.sh
 ./run.sh
 ```
 
-#### 📦 本地全局安装（可选）：
-```bash
-pip install -e .[all]
-# 安装后可在任何目录直接运行全局命令：
-caw        # 启动控制台守护模式
-caw-tray   # 启动系统托盘静默模式
-```
-
 ---
 
 ## 🖥️ 两种运行模式与控制
 
 | 模式 | 启动方式 | 退出方式 | 特点 |
 | :--- | :--- | :--- | :--- |
-| **系统托盘模式 (Tray)** | 双击 `run_tray.bat` 或 `python main.py --tray` | 托盘图标右键退出，或双击 `stop.bat` / `停止守护.bat` | **无黑窗口打扰**，常驻在任务栏右下角。<br/>🟢 绿灯：正常<br/>🟡 黄灯：自愈切线中<br/>🔴 红灯：故障<br/>支持右键菜单**一键强制换线**、**网络自检**、**暂停守护** |
-| **控制台模式 (CLI)** | 双击 `run.bat` 或 `python main.py` | `Ctrl + C` | 适合调试与实时查看日志，带彩色 ASCII 看板与毫秒级延迟输出 |
+| **交互控制台模式 (TUI)** | 双击 `run.bat` 或 `python main.py` | 键盘按 `Q` | **推荐**！零闪烁彩色动态仪表盘，Sparkline 走势，单键 `(R)/(T)/(P)/(Q)` 毫秒级操控 |
+| **系统托盘模式 (Tray)** | 双击 `run_tray.bat` 或 `python main.py --tray` | 托盘图标右键退出，或双击 `stop.bat` | **无黑窗口打扰**，常驻在任务栏右下角状态指示灯。<br/>支持右键菜单**一键强制换线**、**网络自检**、**暂停守护** |
 
 ---
 
 ## 🛠️ 常用命令行参数
 
 ```bash
+# 启动交互动态仪表盘 (默认推荐)
+python main.py
+
 # 以系统托盘模式运行（静默后台无窗口）
 python main.py --tray
 
@@ -128,13 +129,10 @@ python main.py -v
 python main.py --service claude
 
 # 指定首选区域列表（按顺序探测切换）
-python main.py --region US,SG,JP
+python main.py --region TW,JP,SG,US
 
 # 指定心跳频率（默认 30 秒）
 python main.py --interval 20
-
-# 在当前目录下生成自定义配置文件 config.json
-python main.py --gen-config
 ```
 
 ---

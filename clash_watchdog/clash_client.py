@@ -10,9 +10,12 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-COMMON_API_PORTS = [9097, 9090, 7890, 7897, 33331]
+from .controller import BaseProxyController
 
-class ClashClient:
+COMMON_API_PORTS = [9097, 9090, 7890, 7897, 33331]
+COMMON_PROXY_PORTS = [7897, 7890, 10808, 1080]
+
+class ClashClient(BaseProxyController):
     def __init__(self, api_base="auto", secret="", mixed_proxy="auto"):
         self.secret = secret
         self.api_base = None
@@ -77,14 +80,31 @@ class ClashClient:
         if not self.api_base:
             return False
 
-        # 尝试通过 /configs 获取 mixed-port
+        # 尝试通过 /configs 获取 mixed-port，并嗅探验证
         if not self.mixed_proxy:
+            port_found = None
             try:
                 cfg = self._request("/configs", timeout=3)
-                mixed_port = cfg.get("mixed-port") or cfg.get("port") or 7890
-                self.mixed_proxy = f"http://127.0.0.1:{mixed_port}"
+                if isinstance(cfg, dict):
+                    configured_port = cfg.get("mixed-port") or cfg.get("port")
+                    if configured_port and configured_port > 0:
+                        port_found = configured_port
             except Exception:
-                self.mixed_proxy = "http://127.0.0.1:7890"
+                pass
+
+            candidates = [port_found] if port_found else []
+            candidates.extend([p for p in COMMON_PROXY_PORTS if p not in candidates])
+
+            valid_proxy_port = 7897
+            for p in candidates:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(0.3)
+                res = sock.connect_ex(('127.0.0.1', p))
+                sock.close()
+                if res == 0:
+                    valid_proxy_port = p
+                    break
+            self.mixed_proxy = f"http://127.0.0.1:{valid_proxy_port}"
 
         return True
 

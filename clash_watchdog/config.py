@@ -27,6 +27,9 @@ REGION_KEYWORDS = {
     "AU": ["澳大利亚", "au", "australia", "悉尼", "🇦🇺"]
 }
 
+# 专线/优质通道加权优选关键词（拥有更强的抗封锁能力与极低丢包率）
+PRIORITY_KEYWORDS = ["iepl", "iplc", "专线", "家宽", "进阶", "高级", "vip"]
+
 DEFAULT_CONFIG = {
     # Clash 控制端配置（设为 "auto" 将自动扫描发现端口）
     "clash_api_base": "auto",
@@ -46,11 +49,18 @@ DEFAULT_CONFIG = {
     # 优选节点区域优先列表：优先亚洲低延迟合规区，美欧保底
     "preferred_regions": ["TW", "JP", "SG", "KR", "US", "DE", "UK"],
 
-    # 排除的垃圾节点关键词
+    # 优质专线关键词优先加权
+    "priority_keywords": PRIORITY_KEYWORDS,
+
+    # 排除的垃圾/不可抗封锁节点关键词（硬拉黑“直连”，因直连在国内访问 Google/Gemini 必被 GFW SNI 重置阻断）
     "blacklisted_keywords": [
+        "直连", "direct",
         "官网", "到期", "剩余", "流量", "重置", "通知", "发布",
         "expire", "traffic", "reset", "info", "notice"
     ] + GEO_BLOCKED_KEYWORDS,
+
+    # 界面交互模式: "zen" (润物无声单行紧凑模式) 或 "dashboard" (全量仪表盘)
+    "ui_mode": "zen",
 
     # 需要接管切换的 Clash 策略组名称
     "target_groups": ["GLOBAL", "节点选择", "PROXY", "Auto", "代理"],

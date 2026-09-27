@@ -190,6 +190,7 @@ class TrayApp:
 
     def action_quit(self):
         self.running = False
+        self.engine.mutex.release()
         if self.icon:
             self.icon.stop()
 
@@ -211,6 +212,13 @@ class TrayApp:
         )
 
     def run(self):
+        if not self.engine.mutex.acquire():
+            self.engine.notifier.show_toast(
+                "Clash-AI-Watchdog 提示",
+                "已有一个守护进程在后台运行中，无需重复启动。"
+            )
+            return
+
         self.running = True
         # 启动后台守护工作线程
         self.worker_thread = threading.Thread(target=self._watchdog_loop, daemon=True)
